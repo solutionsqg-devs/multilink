@@ -67,9 +67,11 @@ El trabajo debe entregarse **por sectores (1→9)**, siguiendo buenas prácticas
   - Más temas + remover marca
   - Rate limit 240 req/min
 
-- **Stripe Billing**:
+- **Payments (Stripe + MercadoPago)**:
+  - Stripe: Internacional (España, USA, Europa)
+  - MercadoPago: LATAM (Argentina, Brasil, México, etc.)
   - Checkout para suscripción mensual/anual
-  - Webhooks (`onStripeWebhook`) actualizan `plan` y `features`
+  - Webhooks actualizan `plan` y `features`
   - Customer Portal para cancelación/downgrade
 
 - **UX Gating**:
@@ -106,7 +108,7 @@ El trabajo debe entregarse **por sectores (1→9)**, siguiendo buenas prácticas
 
 ## Instrucción final
 
-Genera el **Sector 1 (Scaffolding)** ahora mismo, y continúa con los demás sectores en orden.  
+Genera el **Sector 1 (Scaffolding)** ahora mismo-
 En cada sector entrega:
 
 - Estructura de carpetas

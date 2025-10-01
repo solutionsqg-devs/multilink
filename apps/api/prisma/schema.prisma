@@ -19,7 +19,15 @@ model User {
   password  String
   name      String?
   plan      Plan     @default(FREE)
+  
+  // Payment providers
   stripeCustomerId String? @unique @map("stripe_customer_id")
+  mercadoPagoCustomerId String? @unique @map("mercado_pago_customer_id")
+  paymentProvider String? @map("payment_provider") // 'stripe' | 'mercadopago'
+  
+  // Subscription
+  subscriptionId String? @map("subscription_id")
+  subscriptionStatus String? @map("subscription_status")
   
   // Feature flags para planes
   features  Json     @default("{\"domains\":false,\"advancedAnalytics\":false,\"ogImage\":false,\"removeBranding\":false,\"extraThemes\":false}")

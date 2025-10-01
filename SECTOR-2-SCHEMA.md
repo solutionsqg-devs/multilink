@@ -13,7 +13,9 @@ Base de datos PostgreSQL con Prisma ORM, modelos completos, migraciones y seeds.
 - ✅ Autenticación (email/password)
 - ✅ Planes: FREE / PRO
 - ✅ Feature flags JSON para funcionalidades
-- ✅ Integración con Stripe (customerId)
+- ✅ Integración con Stripe + MercadoPago
+- ✅ Payment provider selector (stripe | mercadopago)
+- ✅ Subscription tracking (ID + status)
 - ✅ Refresh tokens para JWT
 
 ### 2. **Profile** (Perfiles públicos)
@@ -189,6 +191,7 @@ constructor(private prisma: PrismaService) {}
 
 - `User.email`
 - `User.stripeCustomerId`
+- `User.mercadoPagoCustomerId`
 - `Profile.username`
 - `Profile.customDomain`
 - `RefreshToken.token`
