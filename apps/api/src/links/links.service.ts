@@ -183,4 +183,29 @@ export class LinksService {
       },
     });
   }
+
+  async trackClick(id: string, _trackingData: { ip: string; userAgent: string; referer: string }) {
+    const link = await this.prisma.link.findUnique({
+      where: { id, isActive: true },
+    });
+
+    if (!link) {
+      throw new NotFoundException('Link not found');
+    }
+
+    // Incrementar contador
+    await this.prisma.link.update({
+      where: { id },
+      data: {
+        clickCount: {
+          increment: 1,
+        },
+      },
+    });
+
+    // TODO: Guardar ClickEvent para analytics (opcional, implementar después)
+    // await this.prisma.clickEvent.create({ ... })
+
+    return link;
+  }
 }

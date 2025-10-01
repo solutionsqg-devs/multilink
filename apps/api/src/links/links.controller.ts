@@ -8,13 +8,17 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Req,
+  Res,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Request, Response } from 'express';
 import { LinksService } from './links.service';
 import { CreateLinkDto } from './dto/create-link.dto';
 import { UpdateLinkDto } from './dto/update-link.dto';
 import { ReorderLinksDto } from './dto/reorder-links.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('Links')
 @ApiBearerAuth()
@@ -76,5 +80,25 @@ export class LinksController {
   @ApiResponse({ status: 404, description: 'Link not found' })
   hardDelete(@Param('id') id: string, @CurrentUser() user: any) {
     return this.linksService.hardDelete(id, user.id);
+  }
+
+  @Get(':id/click')
+  @Public()
+  @ApiOperation({ summary: 'Track click and redirect' })
+  @ApiResponse({ status: 302, description: 'Redirects to link URL' })
+  @ApiResponse({ status: 404, description: 'Link not found' })
+  async trackClick(@Param('id') id: string, @Req() req: Request, @Res() res: Response) {
+    const ip = req.ip || req.socket.remoteAddress || '';
+    const userAgent = req.headers['user-agent'] || '';
+    const refererHeader = req.headers['referer'] || req.headers['referrer'];
+    const referer = Array.isArray(refererHeader) ? refererHeader[0] : refererHeader || '';
+
+    const link = await this.linksService.trackClick(id, {
+      ip,
+      userAgent,
+      referer,
+    });
+
+    return res.redirect(302, link.url);
   }
 }

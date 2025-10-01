@@ -1,6 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
+import { apiClient } from '@/lib/axios';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -8,8 +10,32 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const [username, setUsername] = useState<string | null>(null);
 
   if (!user) return null;
+
+  // Valores por defecto para features si es null
+  const features = user.features || {
+    domains: false,
+    advancedAnalytics: false,
+    ogImage: false,
+    removeBranding: false,
+    extraThemes: false,
+  };
+
+  // Cargar el username del perfil
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const response = await apiClient.get('/profiles/me');
+        setUsername(response.data.username);
+      } catch (err) {
+        // Si no hay perfil, usar el email como username temporal
+        setUsername(user.email.split('@')[0]);
+      }
+    };
+    loadProfile();
+  }, [user.email]);
 
   return (
     <div className="space-y-6">
@@ -93,11 +119,13 @@ export default function DashboardPage() {
               Editar Perfil
             </Button>
           </Link>
-          <Link href="/@demo" className="flex-1">
-            <Button variant="outline" className="w-full">
-              Ver Perfil Público
-            </Button>
-          </Link>
+          {username && (
+            <Link href={`/${username}`} className="flex-1" target="_blank">
+              <Button variant="outline" className="w-full">
+                Ver Perfil Público
+              </Button>
+            </Link>
+          )}
         </CardContent>
       </Card>
 
@@ -117,32 +145,28 @@ export default function DashboardPage() {
               Analítica básica
             </li>
             <li className="flex items-center text-sm">
-              <span
-                className={`mr-2 ${user.features.domains ? 'text-green-600' : 'text-gray-400'}`}
-              >
-                {user.features.domains ? '✓' : '✕'}
+              <span className={`mr-2 ${features.domains ? 'text-green-600' : 'text-gray-400'}`}>
+                {features.domains ? '✓' : '✕'}
               </span>
-              <span className={user.features.domains ? '' : 'text-gray-400'}>
-                Dominio personalizado
-              </span>
+              <span className={features.domains ? '' : 'text-gray-400'}>Dominio personalizado</span>
             </li>
             <li className="flex items-center text-sm">
               <span
-                className={`mr-2 ${user.features.advancedAnalytics ? 'text-green-600' : 'text-gray-400'}`}
+                className={`mr-2 ${features.advancedAnalytics ? 'text-green-600' : 'text-gray-400'}`}
               >
-                {user.features.advancedAnalytics ? '✓' : '✕'}
+                {features.advancedAnalytics ? '✓' : '✕'}
               </span>
-              <span className={user.features.advancedAnalytics ? '' : 'text-gray-400'}>
+              <span className={features.advancedAnalytics ? '' : 'text-gray-400'}>
                 Analítica avanzada
               </span>
             </li>
             <li className="flex items-center text-sm">
               <span
-                className={`mr-2 ${user.features.removeBranding ? 'text-green-600' : 'text-gray-400'}`}
+                className={`mr-2 ${features.removeBranding ? 'text-green-600' : 'text-gray-400'}`}
               >
-                {user.features.removeBranding ? '✓' : '✕'}
+                {features.removeBranding ? '✓' : '✕'}
               </span>
-              <span className={user.features.removeBranding ? '' : 'text-gray-400'}>
+              <span className={features.removeBranding ? '' : 'text-gray-400'}>
                 Sin marca MultiEnlace
               </span>
             </li>
