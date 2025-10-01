@@ -30,7 +30,7 @@ export function Dialog({
 
 export function DialogTrigger({
   children,
-  asChild,
+  asChild: _asChild,
 }: {
   children: React.ReactNode;
   asChild?: boolean;

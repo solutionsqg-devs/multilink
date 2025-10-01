@@ -107,7 +107,13 @@ export default function ProfilePage() {
       };
 
       // Solo incluir campos PRO si el usuario es PRO
-      const features = user?.features || {};
+      const features = user?.features || {
+        domains: false,
+        advancedAnalytics: false,
+        ogImage: false,
+        removeBranding: false,
+        extraThemes: false,
+      };
       if (features.ogImage) {
         allowedData.customCss = data.customCss || null;
         allowedData.metaTitle = data.metaTitle || null;
