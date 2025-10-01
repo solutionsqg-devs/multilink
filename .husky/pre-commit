@@ -1,0 +1,5 @@
+# Run linter
+pnpm run lint
+
+# Run formatter check
+pnpm run format:check

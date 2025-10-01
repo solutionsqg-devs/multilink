@@ -1,0 +1,6 @@
+# Run tests
+pnpm run test
+
+# Run build
+pnpm run build
+
