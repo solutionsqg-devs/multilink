@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MODELO: USER (Usuarios del sistema)
+// ============================================
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  plan      Plan     @default(FREE)
+  stripeCustomerId String? @unique @map("stripe_customer_id")
+  
+  // Feature flags para planes
+  features  Json     @default("{\"domains\":false,\"advancedAnalytics\":false,\"ogImage\":false,\"removeBranding\":false,\"extraThemes\":false}")
+  
+  // Metadata
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  lastLogin DateTime? @map("last_login")
+  
+  // Relaciones
+  profile   Profile?
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+// ============================================
+// MODELO: REFRESH TOKEN (Para JWT refresh)
+// ============================================
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  // Relaciones
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+// ============================================
+// MODELO: PROFILE (Perfil público del usuario)
+// ============================================
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String   @unique @map("user_id")
+  username    String   @unique
+  displayName String?  @map("display_name")
+  bio         String?  @db.Text
+  avatar      String?
+  
+  // Personalización
+  theme       String   @default("default")
+  customCss   String?  @db.Text @map("custom_css")
+  
+  // SEO
+  metaTitle       String? @map("meta_title")
+  metaDescription String? @map("meta_description")
+  ogImage         String? @map("og_image")
+  
+  // Dominio personalizado (solo Pro)
+  customDomain String? @unique @map("custom_domain")
+  
+  // Analytics
+  viewCount   Int      @default(0) @map("view_count")
+  
+  // Metadata
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relaciones
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links       Link[]
+
+  @@map("profiles")
+}
+
+// ============================================
+// MODELO: LINK (Enlaces del perfil)
+// ============================================
+model Link {
+  id          String   @id @default(cuid())
+  profileId   String   @map("profile_id")
+  
+  // Datos del link
+  title       String
+  url         String   @db.Text
+  description String?  @db.Text
+  icon        String?
+  
+  // Ordenamiento y visibilidad
+  position    Int      @default(0)
+  isActive    Boolean  @default(true) @map("is_active")
+  
+  // Analytics
+  clickCount  Int      @default(0) @map("click_count")
+  
+  // Metadata
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relaciones
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  clicks      ClickEvent[]
+
+  @@map("links")
+  @@index([profileId])
+  @@index([position])
+}
+
+// ============================================
+// MODELO: CLICK EVENT (Tracking de clicks)
+// ============================================
+model ClickEvent {
+  id          String   @id @default(cuid())
+  linkId      String   @map("link_id")
+  
+  // Tracking data
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @db.Text @map("user_agent")
+  referer     String?  @db.Text
+  country     String?
+  city        String?
+  device      String?
+  browser     String?
+  os          String?
+  
+  // UTM Parameters
+  utmSource   String?  @map("utm_source")
+  utmMedium   String?  @map("utm_medium")
+  utmCampaign String?  @map("utm_campaign")
+  
+  // Deduplicación
+  fingerprint String?  @db.Text
+  
+  // Timestamp
+  clickedAt   DateTime @default(now()) @map("clicked_at")
+  
+  // Relaciones
+  link        Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@map("click_events")
+  @@index([linkId])
+  @@index([clickedAt])
+  @@index([fingerprint])
+}
+
+// ============================================
+// ENUMS
+// ============================================
+enum Plan {
+  FREE
+  PRO
+}
+

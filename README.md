@@ -338,7 +338,7 @@ MultiEnlace Team
 ## 🗺️ Roadmap
 
 - [x] **Sector 1**: Scaffolding del monorepo ✅
-- [ ] **Sector 2**: Prisma schema + migraciones
+- [x] **Sector 2**: Prisma schema + migraciones ✅
 - [ ] **Sector 3**: Backend auth + CRUD
 - [ ] **Sector 4**: Frontend auth + dashboard básico
 - [ ] **Sector 5**: Dashboard avanzado + editor
