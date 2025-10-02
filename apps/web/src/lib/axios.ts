@@ -44,11 +44,14 @@ apiClient.interceptors.response.use(
   async error => {
     const originalRequest = error.config;
 
-    // Si es 401 y no es la ruta de refresh
+    // Si es 401 y no es la ruta de refresh, login, register, o me
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes('/auth/refresh')
+      !originalRequest.url?.includes('/auth/refresh') &&
+      !originalRequest.url?.includes('/auth/login') &&
+      !originalRequest.url?.includes('/auth/register') &&
+      !originalRequest.url?.includes('/auth/me')
     ) {
       if (isRefreshing) {
         // Ya hay un refresh en proceso, esperar

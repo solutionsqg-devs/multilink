@@ -107,7 +107,7 @@ export default async function ProfilePublicPage({
     notFound();
   }
 
-  const showBranding = !profile.user.features.removeBranding;
+  const showBranding = !profile.user.features?.removeBranding;
 
   return (
     <>
