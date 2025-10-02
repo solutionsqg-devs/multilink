@@ -97,9 +97,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Returns current user' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMe(@CurrentUser() user: any) {
-    return {
-      user,
-    };
+    return user;
   }
 
   private setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
