@@ -49,7 +49,8 @@ export class AnalyticsService {
     };
 
     // Si es PRO, agregar métricas avanzadas
-    if (user.plan === 'PRO' && user.features?.['advancedAnalytics']) {
+    const features = user.features as any;
+    if (user.plan === 'PRO' && features?.advancedAnalytics) {
       const profileViews = user.profile?.viewCount || 0;
 
       // Clicks en los últimos 7 días
@@ -59,7 +60,7 @@ export class AnalyticsService {
       const clicksLast7Days = await this.prisma.clickEvent.count({
         where: {
           link: { profile: { userId } },
-          timestamp: { gte: sevenDaysAgo },
+          clickedAt: { gte: sevenDaysAgo },
         },
       });
 
@@ -68,15 +69,15 @@ export class AnalyticsService {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
       const clicksByDay = await this.prisma.$queryRaw<Array<{ date: Date; count: bigint }>>`
-        SELECT DATE("timestamp") as date, COUNT(*)::int as count
+        SELECT DATE("clicked_at") as date, COUNT(*)::int as count
         FROM "ClickEvent"
         WHERE "linkId" IN (
           SELECT l.id FROM "Link" l
           INNER JOIN "Profile" p ON l."profileId" = p.id
           WHERE p."userId" = ${userId}
         )
-        AND "timestamp" >= ${thirtyDaysAgo}
-        GROUP BY DATE("timestamp")
+        AND "clicked_at" >= ${thirtyDaysAgo}
+        GROUP BY DATE("clicked_at")
         ORDER BY date DESC
       `;
 
@@ -85,7 +86,7 @@ export class AnalyticsService {
         by: ['referer'],
         where: {
           link: { profile: { userId } },
-          timestamp: { gte: thirtyDaysAgo },
+          clickedAt: { gte: thirtyDaysAgo },
           referer: { not: null },
         },
         _count: { id: true },
@@ -103,7 +104,7 @@ export class AnalyticsService {
         })),
         topReferrers: topReferrers.map(r => ({
           referer: r.referer || 'Direct',
-          count: r._count.id,
+          count: r._count?.id || 0,
         })),
       };
     }
@@ -139,7 +140,8 @@ export class AnalyticsService {
     };
 
     // Si es FREE, solo devolver lo básico
-    if (user.plan === 'FREE' || !user.features?.['advancedAnalytics']) {
+    const features = user.features as any;
+    if (user.plan === 'FREE' || !features?.advancedAnalytics) {
       return basicStats;
     }
 
@@ -149,11 +151,11 @@ export class AnalyticsService {
 
     // Clicks por día
     const clicksByDay = await this.prisma.$queryRaw<Array<{ date: Date; count: bigint }>>`
-      SELECT DATE("timestamp") as date, COUNT(*)::int as count
+      SELECT DATE("clicked_at") as date, COUNT(*)::int as count
       FROM "ClickEvent"
       WHERE "linkId" = ${linkId}
-      AND "timestamp" >= ${thirtyDaysAgo}
-      GROUP BY DATE("timestamp")
+      AND "clicked_at" >= ${thirtyDaysAgo}
+      GROUP BY DATE("clicked_at")
       ORDER BY date DESC
     `;
 
@@ -162,7 +164,7 @@ export class AnalyticsService {
       by: ['referer'],
       where: {
         linkId,
-        timestamp: { gte: thirtyDaysAgo },
+        clickedAt: { gte: thirtyDaysAgo },
         referer: { not: null },
       },
       _count: { id: true },
@@ -174,7 +176,7 @@ export class AnalyticsService {
     const userAgents = await this.prisma.clickEvent.findMany({
       where: {
         linkId,
-        timestamp: { gte: thirtyDaysAgo },
+        clickedAt: { gte: thirtyDaysAgo },
       },
       select: { userAgent: true },
       take: 100,
@@ -213,7 +215,7 @@ export class AnalyticsService {
       })),
       topReferrers: topReferrers.map(r => ({
         referer: r.referer || 'Direct',
-        count: r._count.id,
+        count: r._count?.id || 0,
       })),
       devices,
     };

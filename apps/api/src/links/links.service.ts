@@ -207,10 +207,10 @@ export class LinksService {
     await this.prisma.clickEvent.create({
       data: {
         linkId: id,
-        ip: trackingData.ip || null,
+        ipAddress: trackingData.ip || null,
         userAgent: trackingData.userAgent || null,
         referer: trackingData.referer || null,
-        timestamp: new Date(),
+        clickedAt: new Date(),
       },
     });
 
