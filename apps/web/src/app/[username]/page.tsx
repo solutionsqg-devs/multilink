@@ -7,6 +7,10 @@ import { ViewTracker } from '@/components/view-tracker';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+// Forzar renderizado dinámico para evitar errores en build
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+
 interface Profile {
   id: string;
   username: string;
