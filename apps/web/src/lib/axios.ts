@@ -72,14 +72,9 @@ apiClient.interceptors.response.use(
         // Reintentar request original
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Refresh falló, redirigir a login
+        // Refresh falló - NO redirigir aquí, dejar que el AuthContext lo maneje
         isRefreshing = false;
         refreshSubscribers = [];
-
-        // Solo redirigir en cliente
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login?session=expired';
-        }
 
         return Promise.reject(refreshError);
       }

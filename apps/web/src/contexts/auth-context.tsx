@@ -34,7 +34,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await apiClient.get<User>('/auth/me');
       setUser(response.data);
-    } catch {
+    } catch (error: any) {
+      // Si es 401, significa que no hay sesión válida
       setUser(null);
     } finally {
       setLoading(false);
