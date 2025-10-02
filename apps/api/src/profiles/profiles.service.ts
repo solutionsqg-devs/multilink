@@ -109,13 +109,22 @@ export class ProfilesService {
       throw new NotFoundException('Profile not found');
     }
 
-    // Increment view count
+    return profile;
+  }
+
+  async incrementViewCount(username: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { username },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
     await this.prisma.profile.update({
       where: { id: profile.id },
       data: { viewCount: { increment: 1 } },
     });
-
-    return profile;
   }
 
   async findByUserId(userId: string) {

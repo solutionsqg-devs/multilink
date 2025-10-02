@@ -88,4 +88,14 @@ export class ProfilesController {
   remove(@Param('id') id: string, @CurrentUser() user: any) {
     return this.profilesService.remove(id, user.id);
   }
+
+  @Post('username/:username/view')
+  @Public()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Increment profile view count' })
+  @ApiResponse({ status: 204, description: 'View count incremented' })
+  @ApiResponse({ status: 404, description: 'Profile not found' })
+  async incrementView(@Param('username') username: string) {
+    await this.profilesService.incrementViewCount(username);
+  }
 }

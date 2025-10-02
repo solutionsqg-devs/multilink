@@ -5,6 +5,21 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
 
+  // Configuración de imágenes
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+    ],
+    formats: ['image/webp', 'image/avif'],
+  },
+
   // ISR configuration
   experimental: {
     staleTimes: {
@@ -34,6 +49,16 @@ const nextConfig: NextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
+          },
+        ],
+      },
+      {
+        // Cache para perfiles públicos
+        source: '/:username',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=60, stale-while-revalidate=300',
           },
         ],
       },
