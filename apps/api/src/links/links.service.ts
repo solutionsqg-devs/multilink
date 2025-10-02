@@ -184,7 +184,7 @@ export class LinksService {
     });
   }
 
-  async trackClick(id: string, _trackingData: { ip: string; userAgent: string; referer: string }) {
+  async trackClick(id: string, trackingData: { ip: string; userAgent: string; referer: string }) {
     const link = await this.prisma.link.findUnique({
       where: { id, isActive: true },
     });
@@ -193,7 +193,7 @@ export class LinksService {
       throw new NotFoundException('Link not found');
     }
 
-    // Incrementar contador
+    // Incrementar contador en Link
     await this.prisma.link.update({
       where: { id },
       data: {
@@ -203,8 +203,16 @@ export class LinksService {
       },
     });
 
-    // TODO: Guardar ClickEvent para analytics (opcional, implementar después)
-    // await this.prisma.clickEvent.create({ ... })
+    // Guardar ClickEvent para analytics
+    await this.prisma.clickEvent.create({
+      data: {
+        linkId: id,
+        ip: trackingData.ip || null,
+        userAgent: trackingData.userAgent || null,
+        referer: trackingData.referer || null,
+        timestamp: new Date(),
+      },
+    });
 
     return link;
   }
